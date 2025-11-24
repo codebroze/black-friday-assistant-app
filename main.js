@@ -109,12 +109,15 @@ Based on your web search results, create a comprehensive JSON array of deals wit
   "stock": estimated stock level as number (50-100),
   "seller": "retailer name from search results",
   "shippingCost": "FREE or shipping cost",
-  "imageUrl": "use placeholder: https://via.placeholder.com/300x300/0066cc/ffffff?text=ProductName"
+  "productUrl": "direct URL to the product page from search results",
+  "imageUrl": "actual product image URL from search results (if available, otherwise use: https://via.placeholder.com/300x300/0066cc/ffffff?text=ProductName)"
 }
 
 Important:
 - Use REAL deals from your web search results
-- Extract actual prices, discounts, and product names from search results
+- Extract actual prices, discounts, product names, and URLs from search results
+- Include the actual product URL so users can navigate to the deal
+- Include actual product image URLs when available from search results
 - Include the actual retailer/seller from the deals you find
 - ${category !== 'all' ? `Focus on "${category}" category deals` : 'Include a variety of categories'}
 - If you find 10-20 real deals, that's perfect. Return what you find.
@@ -172,6 +175,7 @@ Important:
       stock: Number(deal.stock) || 50,
       seller: deal.seller || 'Amazon',
       shippingCost: deal.shippingCost || 'FREE',
+      productUrl: deal.productUrl || '#',
       imageUrl: deal.imageUrl || `https://via.placeholder.com/300x300/0066cc/ffffff?text=Product`
     }));
   } catch (error) {
@@ -223,6 +227,7 @@ function generateMockDeals(query, category) {
       stock: Math.floor(Math.random() * 100) + 10,
       seller: ['Amazon', 'Best Buy', 'Walmart', 'Target', 'Newegg'][Math.floor(Math.random() * 5)],
       shippingCost: Math.random() > 0.6 ? 'FREE' : '$' + (Math.random() * 20 + 5).toFixed(2),
+      productUrl: `#mock-deal-${i}`,
       imageUrl: `https://via.placeholder.com/300x300/0066cc/ffffff?text=${encodeURIComponent(productName)}`
     };
 

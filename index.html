@@ -71,7 +71,10 @@
     <!-- Results Info -->
     <div class="results-info">
       <div id="resultsCount">Search for deals to get started</div>
-      <div id="loadingIndicator" class="loading hidden">Searching for deals...</div>
+      <div id="loadingIndicator" class="loading hidden">
+        <div class="spinner"></div>
+        <span>Searching for deals with Gemini...</span>
+      </div>
     </div>
 
     <!-- Main Content Area -->
@@ -99,6 +102,7 @@
                 <th>Seller</th>
                 <th>Shipping</th>
                 <th>Stock</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="dealsTableBody">
