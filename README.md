@@ -4,7 +4,8 @@ An Electron desktop application for searching and browsing Black Friday deals wi
 
 ## Features
 
-- 🔍 **Search Functionality** - Search for deals by product name, brand, or category
+- 🤖 **AI-Powered Search** - Uses Google Gemini AI to find and generate realistic Black Friday deals
+- 🔍 **Smart Search Functionality** - Search for deals by product name, brand, or category with intelligent results
 - 📂 **Category Filtering** - Filter deals by categories (Electronics, Home & Kitchen, Fashion, Toys & Games, Sports, Books)
 - 🎨 **Multiple View Modes** - Toggle between grid and table views
 - 📊 **Comprehensive Deal Information**:
@@ -30,6 +31,19 @@ cd black-friday-assistant-app
 ```bash
 npm install
 ```
+
+3. Set up Gemini API:
+   - Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Create a `.env` file in the root directory:
+   ```bash
+   cp .env.example .env
+   ```
+   - Add your API key to the `.env` file:
+   ```
+   GEMINI_API_KEY=your_actual_api_key_here
+   ```
+
+   **Note:** The app will work without the API key by falling back to mock data, but the Gemini API provides more realistic and varied deal suggestions.
 
 ## Usage
 
@@ -69,6 +83,8 @@ black-friday-assistant-app/
 - **Electron** - Cross-platform desktop application framework
 - **HTML/CSS/JavaScript** - Frontend technologies
 - **Node.js** - Backend runtime
+- **Google Gemini AI** - AI-powered deal generation and search
+- **dotenv** - Environment variable management
 
 ## Development
 
@@ -77,21 +93,41 @@ The app uses Electron's security best practices:
 - Node integration disabled
 - Preload script for secure IPC communication
 
-### Mock Data
+### Gemini AI Integration
 
-Currently, the app generates mock deal data. In a production environment, you would:
-1. Replace the `generateMockDeals()` function in `main.js`
-2. Integrate with a real deals API (e.g., Amazon Product API, eBay API)
-3. Add authentication if required by the API
+The app uses Google's Gemini AI to generate realistic Black Friday deals based on search queries and categories. Key features:
+
+- **AI-Powered Search**: Gemini generates contextual, relevant deals based on user queries
+- **Category Intelligence**: Deals are tailored to specific product categories
+- **Realistic Data**: AI creates believable product names, prices, discounts, and descriptions
+- **Fallback Support**: Automatically falls back to mock data if the API key is not configured or if there's an error
+
+### Environment Variables
+
+The app uses `.env` file for configuration:
+- `GEMINI_API_KEY`: Your Google Gemini API key (required for AI-powered search)
+- The `.env` file is excluded from git via `.gitignore` to protect your API key
+- Use `.env.example` as a template for required variables
+
+### Integrating Real Shopping APIs
+
+To integrate real shopping data from retailers:
+1. Add API credentials to `.env` file
+2. Update the `searchDealsWithGemini()` function in `main.js` to fetch real deals
+3. Consider using APIs like Amazon Product Advertising API, eBay API, or other affiliate programs
+4. Combine real data with Gemini's analysis for enhanced recommendations
 
 ## Future Enhancements
 
-- Integration with real shopping APIs
+- Integration with real shopping retailer APIs (Amazon, eBay, etc.)
 - Favorites/wishlist functionality
-- Price history tracking
-- Email notifications for price drops
+- Price history tracking and price drop alerts
+- Email notifications for new deals matching criteria
 - Export deals to CSV/PDF
 - Dark mode support
+- Deal comparison tool
+- Browser extension for tracking prices across websites
+- Mobile companion app
 
 ## License
 
