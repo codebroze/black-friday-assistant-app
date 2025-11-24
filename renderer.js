@@ -172,6 +172,9 @@ function createDealCard(deal) {
           <span class="${stockClass}">${deal.stock} left</span>
         </div>
       </div>
+      <a href="${deal.productUrl}" target="_blank" rel="noopener noreferrer" class="view-deal-btn">
+        View Deal →
+      </a>
     </div>
   `;
 
@@ -213,6 +216,11 @@ function createTableRow(deal) {
     <td>${deal.seller}</td>
     <td class="${deal.shippingCost === 'FREE' ? 'shipping-free' : ''}">${deal.shippingCost}</td>
     <td class="stock-cell ${stockClass}">${deal.stock}</td>
+    <td>
+      <a href="${deal.productUrl}" target="_blank" rel="noopener noreferrer" class="table-view-deal-btn">
+        View Deal
+      </a>
+    </td>
   `;
 
   return row;
