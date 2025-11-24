@@ -1,0 +1,22 @@
+{
+  "name": "black-friday-deals-finder",
+  "version": "1.0.0",
+  "description": "Electron app for searching Black Friday deals",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging"
+  },
+  "keywords": [
+    "electron",
+    "black-friday",
+    "deals",
+    "shopping"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0"
+  },
+  "dependencies": {}
+}

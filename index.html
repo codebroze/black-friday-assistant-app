@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+  <title>Black Friday Deals Finder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <h1>🛍️ Black Friday Deals</h1>
+      </div>
+      <div class="search-container">
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search for deals, products, brands..."
+        >
+        <button id="searchButton" class="btn btn-primary">Search</button>
+      </div>
+    </header>
+
+    <!-- Filters and Controls -->
+    <div class="controls-bar">
+      <div class="filters">
+        <label for="categorySelect">Category:</label>
+        <select id="categorySelect" class="category-select">
+          <option value="all">All Categories</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Home & Kitchen">Home & Kitchen</option>
+          <option value="Fashion">Fashion</option>
+          <option value="Toys & Games">Toys & Games</option>
+          <option value="Sports">Sports</option>
+          <option value="Books">Books</option>
+        </select>
+
+        <label for="sortSelect">Sort by:</label>
+        <select id="sortSelect" class="sort-select">
+          <option value="discount">Highest Discount</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="rating">Highest Rating</option>
+          <option value="savings">Most Savings</option>
+        </select>
+      </div>
+
+      <div class="view-toggle">
+        <button id="gridViewBtn" class="btn-view active" title="Grid View">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+          </svg>
+        </button>
+        <button id="tableViewBtn" class="btn-view" title="Table View">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Info -->
+    <div class="results-info">
+      <div id="resultsCount">Search for deals to get started</div>
+      <div id="loadingIndicator" class="loading hidden">Searching for deals...</div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Grid View -->
+      <div id="gridView" class="grid-view active">
+        <div id="dealsGrid" class="deals-grid">
+          <!-- Deals will be populated here -->
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div id="tableView" class="table-view">
+        <div class="table-container">
+          <table id="dealsTable" class="deals-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Original Price</th>
+                <th>Sale Price</th>
+                <th>Savings</th>
+                <th>Discount</th>
+                <th>Rating</th>
+                <th>Seller</th>
+                <th>Shipping</th>
+                <th>Stock</th>
+              </tr>
+            </thead>
+            <tbody id="dealsTableBody">
+              <!-- Table rows will be populated here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="empty-state">
+        <div class="empty-state-content">
+          <h2>🎉 Find Amazing Black Friday Deals!</h2>
+          <p>Search for products or select a category to discover incredible savings.</p>
+          <button id="browseDealsBtn" class="btn btn-primary btn-large">Browse All Deals</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
