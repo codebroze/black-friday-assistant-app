@@ -11,9 +11,9 @@ let model;
 try {
   if (process.env.GEMINI_API_KEY) {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    // Use gemini-1.5-pro which supports Google Search grounding
+    // Use gemini-3-pro-preview which supports Google Search grounding
     model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-pro',
+      model: 'gemini-3-pro-preview',
       tools: [{
         googleSearch: {}
       }]

@@ -105,7 +105,7 @@ The app uses Google's Gemini AI with **Google Search grounding** to find real Bl
 
 #### How It Works:
 1. User enters a search query (e.g., "laptop deals")
-2. The app sends the query to Gemini 1.5 Pro with Google Search grounding enabled
+2. The app sends the query to Gemini 3 Pro Preview with Google Search grounding enabled
 3. Gemini searches the web for real Black Friday deals
 4. AI processes the search results and extracts deal information
 5. Returns structured JSON with real product names, prices, retailers, and discounts
@@ -120,7 +120,7 @@ The app uses `.env` file for configuration:
 
 ### Web Search Integration
 
-The app now uses **Gemini 1.5 Pro with Google Search grounding** to search the web for real deals:
+The app now uses **Gemini 3 Pro Preview with Google Search grounding** to search the web for real deals:
 
 - **Google Search Grounding**: Enabled in the model configuration with `tools: [{ googleSearch: {} }]`
 - **Real Deal Discovery**: Searches actual retailer websites for current Black Friday deals
