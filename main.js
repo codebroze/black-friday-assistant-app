@@ -11,8 +11,14 @@ let model;
 try {
   if (process.env.GEMINI_API_KEY) {
     genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    model = genAI.getGenerativeModel({ model: 'gemini-pro' });
-    console.log('Gemini API initialized successfully');
+    // Use gemini-3-pro-preview which supports Google Search grounding
+    model = genAI.getGenerativeModel({
+      model: 'gemini-3-pro-preview',
+      tools: [{
+        googleSearch: {}
+      }]
+    });
+    console.log('Gemini API with Google Search initialized successfully');
   } else {
     console.warn('GEMINI_API_KEY not found in .env file. Using mock data.');
   }
@@ -78,43 +84,60 @@ ipcMain.handle('search-deals', async (event, { query, category }) => {
   }
 });
 
-// Search for deals using Gemini API
+// Search for deals using Gemini API with Google Search
 async function searchDealsWithGemini(query, category) {
   const searchQuery = query && query.trim() ? query : 'popular products';
   const categoryFilter = category && category !== 'all' ? category : 'various categories';
 
-  const prompt = `You are a Black Friday deals expert. Generate a JSON array of 15-25 realistic Black Friday deals for "${searchQuery}" in "${categoryFilter}".
+  // Construct a web search query for real Black Friday deals
+  const prompt = `Search the web for current Black Friday deals for "${searchQuery}" in "${categoryFilter}".
 
-Each deal should have this exact structure:
+Find real deals from major retailers like Amazon, Best Buy, Walmart, Target, Newegg, etc.
+
+Based on your web search results, create a comprehensive JSON array of deals with the following structure:
 {
   "id": "unique-id",
-  "title": "Brand Product Name",
-  "description": "Compelling deal description (1-2 sentences)",
+  "title": "Exact product name from the deal",
+  "description": "Brief description of the deal (1-2 sentences)",
   "category": "Electronics|Home & Kitchen|Fashion|Toys & Games|Sports|Books",
-  "originalPrice": "number as string (e.g., \"599.99\")",
-  "salePrice": "number as string (discounted price)",
-  "savings": "number as string (originalPrice - salePrice)",
-  "discountPercent": number (20-80),
-  "rating": "string (3.5-5.0)",
-  "reviews": number (100-5000),
-  "stock": number (10-100),
-  "seller": "Amazon|Best Buy|Walmart|Target|Newegg",
-  "shippingCost": "FREE or price as string",
-  "imageUrl": "https://via.placeholder.com/300x300/0066cc/ffffff?text=ProductName"
+  "originalPrice": "original price as string",
+  "salePrice": "sale price as string",
+  "savings": "amount saved as string",
+  "discountPercent": discount percentage as number,
+  "rating": "product rating as string (if available, otherwise estimate 4.0-4.5)",
+  "reviews": number of reviews (if available, otherwise estimate 100-1000),
+  "stock": estimated stock level as number (50-100),
+  "seller": "retailer name from search results",
+  "shippingCost": "FREE or shipping cost",
+  "imageUrl": "use placeholder: https://via.placeholder.com/300x300/0066cc/ffffff?text=ProductName"
 }
 
 Important:
-- Make deals realistic and varied
-- Ensure math is correct: savings = originalPrice - salePrice
-- ${category !== 'all' ? `ALL deals must be in "${category}" category` : 'Mix categories realistically'}
-- Include well-known brands
-- Make descriptions compelling
-- Return ONLY valid JSON array, no other text`;
+- Use REAL deals from your web search results
+- Extract actual prices, discounts, and product names from search results
+- Include the actual retailer/seller from the deals you find
+- ${category !== 'all' ? `Focus on "${category}" category deals` : 'Include a variety of categories'}
+- If you find 10-20 real deals, that's perfect. Return what you find.
+- Ensure savings = originalPrice - salePrice
+- Return ONLY a valid JSON array, no other text or markdown`;
 
   try {
-    const result = await model.generateContent(prompt);
+    console.log(`Searching web for: ${searchQuery} in ${categoryFilter}`);
+
+    // Generate content with Google Search grounding enabled
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 40,
+        topP: 0.95,
+      }
+    });
+
     const response = await result.response;
     const text = response.text();
+
+    console.log('Received response from Gemini with web search');
 
     // Extract JSON from the response (handle markdown code blocks)
     let jsonText = text.trim();
@@ -124,17 +147,25 @@ Important:
       jsonText = jsonText.replace(/```\n?/g, '');
     }
 
+    // Try to find JSON array in the response
+    const jsonMatch = jsonText.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      jsonText = jsonMatch[0];
+    }
+
     const deals = JSON.parse(jsonText);
 
-    // Validate and fix the deals data
+    console.log(`Found ${deals.length} deals from web search`);
+
+    // Validate and normalize the deals data
     return deals.map((deal, index) => ({
       id: deal.id || `deal-${Date.now()}-${index}`,
       title: deal.title || 'Product',
       description: deal.description || 'Great Black Friday deal!',
       category: deal.category || categoryFilter,
-      originalPrice: String(deal.originalPrice || '99.99'),
-      salePrice: String(deal.salePrice || '49.99'),
-      savings: String(deal.savings || '50.00'),
+      originalPrice: String(deal.originalPrice || '99.99').replace('$', ''),
+      salePrice: String(deal.salePrice || '49.99').replace('$', ''),
+      savings: String(deal.savings || '50.00').replace('$', ''),
       discountPercent: Number(deal.discountPercent) || 50,
       rating: String(deal.rating || '4.5'),
       reviews: Number(deal.reviews) || 500,
@@ -144,7 +175,8 @@ Important:
       imageUrl: deal.imageUrl || `https://via.placeholder.com/300x300/0066cc/ffffff?text=Product`
     }));
   } catch (error) {
-    console.error('Error parsing Gemini response:', error);
+    console.error('Error searching deals with Gemini:', error);
+    console.error('Error details:', error.message);
     throw error;
   }
 }

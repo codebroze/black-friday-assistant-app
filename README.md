@@ -4,8 +4,8 @@ An Electron desktop application for searching and browsing Black Friday deals wi
 
 ## Features
 
-- 🤖 **AI-Powered Search** - Uses Google Gemini AI to find and generate realistic Black Friday deals
-- 🔍 **Smart Search Functionality** - Search for deals by product name, brand, or category with intelligent results
+- 🤖 **AI-Powered Web Search** - Uses Google Gemini AI with Google Search grounding to find real Black Friday deals from the web
+- 🔍 **Smart Search Functionality** - Search for deals by product name, brand, or category with results from actual retailers
 - 📂 **Category Filtering** - Filter deals by categories (Electronics, Home & Kitchen, Fashion, Toys & Games, Sports, Books)
 - 🎨 **Multiple View Modes** - Toggle between grid and table views
 - 📊 **Comprehensive Deal Information**:
@@ -43,7 +43,7 @@ npm install
    GEMINI_API_KEY=your_actual_api_key_here
    ```
 
-   **Note:** The app will work without the API key by falling back to mock data, but the Gemini API provides more realistic and varied deal suggestions.
+   **Note:** The app will work without the API key by falling back to mock data, but the Gemini API with Google Search grounding provides real Black Friday deals from actual retailers on the web.
 
 ## Usage
 
@@ -93,14 +93,23 @@ The app uses Electron's security best practices:
 - Node integration disabled
 - Preload script for secure IPC communication
 
-### Gemini AI Integration
+### Gemini AI Integration with Web Search
 
-The app uses Google's Gemini AI to generate realistic Black Friday deals based on search queries and categories. Key features:
+The app uses Google's Gemini AI with **Google Search grounding** to find real Black Friday deals from the web. Key features:
 
-- **AI-Powered Search**: Gemini generates contextual, relevant deals based on user queries
-- **Category Intelligence**: Deals are tailored to specific product categories
-- **Realistic Data**: AI creates believable product names, prices, discounts, and descriptions
+- **Real-Time Web Search**: Gemini searches the web for actual Black Friday deals from major retailers
+- **Grounded Results**: Uses Google Search to find current deals, prices, and discounts
+- **AI Processing**: Gemini processes search results and returns structured JSON data
+- **Category Intelligence**: Deals are filtered and tailored to specific product categories
 - **Fallback Support**: Automatically falls back to mock data if the API key is not configured or if there's an error
+
+#### How It Works:
+1. User enters a search query (e.g., "laptop deals")
+2. The app sends the query to Gemini 3 Pro Preview with Google Search grounding enabled
+3. Gemini searches the web for real Black Friday deals
+4. AI processes the search results and extracts deal information
+5. Returns structured JSON with real product names, prices, retailers, and discounts
+6. UI displays the deals in grid or table format
 
 ### Environment Variables
 
@@ -109,13 +118,19 @@ The app uses `.env` file for configuration:
 - The `.env` file is excluded from git via `.gitignore` to protect your API key
 - Use `.env.example` as a template for required variables
 
-### Integrating Real Shopping APIs
+### Web Search Integration
 
-To integrate real shopping data from retailers:
+The app now uses **Gemini 3 Pro Preview with Google Search grounding** to search the web for real deals:
+
+- **Google Search Grounding**: Enabled in the model configuration with `tools: [{ googleSearch: {} }]`
+- **Real Deal Discovery**: Searches actual retailer websites for current Black Friday deals
+- **Structured Output**: AI processes web results and returns JSON formatted deal data
+- **No Additional APIs Needed**: Google Search grounding is built into the Gemini API
+
+For additional enhancements, you can still integrate direct retailer APIs:
 1. Add API credentials to `.env` file
-2. Update the `searchDealsWithGemini()` function in `main.js` to fetch real deals
+2. Combine Gemini's web search results with direct API data
 3. Consider using APIs like Amazon Product Advertising API, eBay API, or other affiliate programs
-4. Combine real data with Gemini's analysis for enhanced recommendations
 
 ## Future Enhancements
 
