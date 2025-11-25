@@ -30,6 +30,7 @@ const aiProviderSelect = document.getElementById('aiProviderSelect');
 const geminiApiKey = document.getElementById('geminiApiKey');
 const openaiApiKey = document.getElementById('openaiApiKey');
 const anthropicApiKey = document.getElementById('anthropicApiKey');
+const openrouterApiKey = document.getElementById('openrouterApiKey');
 const apiKeyWarning = document.getElementById('apiKeyWarning');
 
 // Event listeners
@@ -87,6 +88,7 @@ async function openSettingsModal() {
     geminiApiKey.value = settings.apiKeys.gemini || '';
     openaiApiKey.value = settings.apiKeys.openai || '';
     anthropicApiKey.value = settings.apiKeys.anthropic || '';
+    openrouterApiKey.value = settings.apiKeys.openrouter || '';
 
     // Validate current provider
     await validateApiKey();
@@ -116,16 +118,19 @@ async function saveSettingsHandler() {
   const geminiKey = geminiApiKey.value.trim();
   const openaiKey = openaiApiKey.value.trim();
   const anthropicKey = anthropicApiKey.value.trim();
+  const openrouterKey = openrouterApiKey.value.trim();
 
   if (geminiKey) settings.apiKeys.gemini = geminiKey;
   if (openaiKey) settings.apiKeys.openai = openaiKey;
   if (anthropicKey) settings.apiKeys.anthropic = anthropicKey;
+  if (openrouterKey) settings.apiKeys.openrouter = openrouterKey;
 
   // Validate that the selected provider has an API key
   const hasRequiredKey =
     (selectedProvider === 'gemini' && geminiKey) ||
     (selectedProvider === 'openai' && openaiKey) ||
-    (selectedProvider === 'anthropic' && anthropicKey);
+    (selectedProvider === 'anthropic' && anthropicKey) ||
+    (selectedProvider === 'openrouter' && openrouterKey);
 
   if (!hasRequiredKey) {
     apiKeyWarning.classList.remove('hidden');
@@ -163,7 +168,8 @@ async function validateApiKey() {
   const providerInputs = {
     gemini: geminiApiKey,
     openai: openaiApiKey,
-    anthropic: anthropicApiKey
+    anthropic: anthropicApiKey,
+    openrouter: openrouterApiKey
   };
 
   const currentInput = providerInputs[selectedProvider];
@@ -187,7 +193,8 @@ function getProviderName(provider) {
   const names = {
     gemini: 'Google Gemini',
     openai: 'OpenAI',
-    anthropic: 'Anthropic Claude'
+    anthropic: 'Anthropic Claude',
+    openrouter: 'OpenRouter'
   };
   return names[provider] || provider;
 }

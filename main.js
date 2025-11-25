@@ -13,7 +13,8 @@ let currentProvider = 'gemini';
 let aiClients = {
   gemini: null,
   openai: null,
-  anthropic: null
+  anthropic: null,
+  openrouter: null
 };
 
 // Initialize AI clients based on stored settings
@@ -24,6 +25,7 @@ function initializeAIClients() {
   const geminiKey = store.get('apiKeys.gemini') || process.env.GEMINI_API_KEY;
   const openaiKey = store.get('apiKeys.openai') || process.env.OPENAI_API_KEY;
   const anthropicKey = store.get('apiKeys.anthropic') || process.env.ANTHROPIC_API_KEY;
+  const openrouterKey = store.get('apiKeys.openrouter') || process.env.OPENROUTER_API_KEY;
 
   // Initialize Gemini
   try {
@@ -69,6 +71,21 @@ function initializeAIClients() {
     }
   } catch (error) {
     console.error('Error initializing Anthropic API:', error.message);
+  }
+
+  // Initialize OpenRouter
+  try {
+    if (openrouterKey) {
+      aiClients.openrouter = new OpenAI({
+        apiKey: openrouterKey,
+        baseURL: 'https://openrouter.ai/api/v1'
+      });
+      console.log('OpenRouter API initialized successfully');
+    } else {
+      console.warn('OPENROUTER_API_KEY not configured');
+    }
+  } catch (error) {
+    console.error('Error initializing OpenRouter API:', error.message);
   }
 }
 
@@ -120,7 +137,8 @@ ipcMain.handle('get-settings', async () => {
     apiKeys: {
       gemini: store.get('apiKeys.gemini', ''),
       openai: store.get('apiKeys.openai', ''),
-      anthropic: store.get('apiKeys.anthropic', '')
+      anthropic: store.get('apiKeys.anthropic', ''),
+      openrouter: store.get('apiKeys.openrouter', '')
     }
   };
 });
@@ -142,6 +160,9 @@ ipcMain.handle('save-settings', async (event, settings) => {
       }
       if (settings.apiKeys.anthropic) {
         store.set('apiKeys.anthropic', settings.apiKeys.anthropic);
+      }
+      if (settings.apiKeys.openrouter) {
+        store.set('apiKeys.openrouter', settings.apiKeys.openrouter);
       }
     }
 
@@ -177,6 +198,8 @@ ipcMain.handle('search-deals', async (event, { query, category }) => {
       return await searchDealsWithOpenAI(query, category, client);
     } else if (currentProvider === 'anthropic') {
       return await searchDealsWithAnthropic(query, category, client);
+    } else if (currentProvider === 'openrouter') {
+      return await searchDealsWithOpenRouter(query, category, client);
     } else {
       return generateMockDeals(query, category);
     }
@@ -356,6 +379,64 @@ Important:
     return parseDealsResponse(text, categoryFilter);
   } catch (error) {
     console.error('Error searching deals with Anthropic:', error);
+    throw error;
+  }
+}
+
+// Search for deals using OpenRouter API
+async function searchDealsWithOpenRouter(query, category, client) {
+  const searchQuery = query && query.trim() ? query : 'popular products';
+  const categoryFilter = category && category !== 'all' ? category : 'various categories';
+
+  const prompt = `Find current Black Friday deals for "${searchQuery}" in "${categoryFilter}".
+
+Create a comprehensive JSON array of 10-20 Black Friday deals with the following structure:
+{
+  "id": "unique-id",
+  "title": "Product name",
+  "description": "Brief description of the deal (1-2 sentences)",
+  "category": "Electronics|Home & Kitchen|Fashion|Toys & Games|Sports|Books",
+  "originalPrice": "original price as string",
+  "salePrice": "sale price as string",
+  "savings": "amount saved as string",
+  "discountPercent": discount percentage as number,
+  "rating": "product rating as string (4.0-5.0)",
+  "reviews": number of reviews (100-5000),
+  "stock": estimated stock level as number (10-100),
+  "seller": "retailer name (Amazon, Best Buy, Walmart, Target, etc.)",
+  "shippingCost": "FREE or shipping cost",
+  "productUrl": "#deal-url",
+  "imageUrl": "https://via.placeholder.com/300x300/0066cc/ffffff?text=ProductName"
+}
+
+Important:
+- ${category !== 'all' ? `Focus on "${category}" category deals` : 'Include a variety of categories'}
+- Make the deals realistic with appropriate pricing
+- Ensure savings = originalPrice - salePrice
+- Return ONLY a valid JSON array, no other text or markdown`;
+
+  try {
+    console.log(`Searching for deals: ${searchQuery} in ${categoryFilter} using OpenRouter`);
+
+    const completion = await client.chat.completions.create({
+      model: "openai/gpt-4-turbo-preview",
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful assistant that finds and formats Black Friday deals. Always respond with valid JSON only."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.7,
+    });
+
+    const text = completion.choices[0].message.content;
+    return parseDealsResponse(text, categoryFilter);
+  } catch (error) {
+    console.error('Error searching deals with OpenRouter:', error);
     throw error;
   }
 }
