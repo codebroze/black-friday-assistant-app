@@ -20,6 +20,18 @@ const resultsCount = document.getElementById('resultsCount');
 const loadingIndicator = document.getElementById('loadingIndicator');
 const browseDealsBtn = document.getElementById('browseDealsBtn');
 
+// Settings modal elements
+const settingsBtn = document.getElementById('settingsBtn');
+const settingsModal = document.getElementById('settingsModal');
+const closeSettings = document.getElementById('closeSettings');
+const cancelSettings = document.getElementById('cancelSettings');
+const saveSettings = document.getElementById('saveSettings');
+const aiProviderSelect = document.getElementById('aiProviderSelect');
+const geminiApiKey = document.getElementById('geminiApiKey');
+const openaiApiKey = document.getElementById('openaiApiKey');
+const anthropicApiKey = document.getElementById('anthropicApiKey');
+const apiKeyWarning = document.getElementById('apiKeyWarning');
+
 // Event listeners
 searchButton.addEventListener('click', handleSearch);
 searchInput.addEventListener('keypress', (e) => {
@@ -47,6 +59,138 @@ browseDealsBtn.addEventListener('click', () => {
   categorySelect.value = 'all';
   handleSearch();
 });
+
+// Settings modal event listeners
+settingsBtn.addEventListener('click', openSettingsModal);
+closeSettings.addEventListener('click', closeSettingsModal);
+cancelSettings.addEventListener('click', closeSettingsModal);
+saveSettings.addEventListener('click', saveSettingsHandler);
+
+// Close modal when clicking outside
+settingsModal.addEventListener('click', (e) => {
+  if (e.target === settingsModal) {
+    closeSettingsModal();
+  }
+});
+
+// Validate API key when provider changes
+aiProviderSelect.addEventListener('change', validateApiKey);
+
+// Settings modal functions
+async function openSettingsModal() {
+  try {
+    // Load current settings
+    const settings = await window.electronAPI.getSettings();
+
+    // Populate the form
+    aiProviderSelect.value = settings.aiProvider || 'gemini';
+    geminiApiKey.value = settings.apiKeys.gemini || '';
+    openaiApiKey.value = settings.apiKeys.openai || '';
+    anthropicApiKey.value = settings.apiKeys.anthropic || '';
+
+    // Validate current provider
+    await validateApiKey();
+
+    // Show modal
+    settingsModal.classList.add('active');
+  } catch (error) {
+    console.error('Error loading settings:', error);
+  }
+}
+
+function closeSettingsModal() {
+  settingsModal.classList.remove('active');
+  apiKeyWarning.classList.add('hidden');
+}
+
+async function saveSettingsHandler() {
+  const selectedProvider = aiProviderSelect.value;
+
+  // Get the API keys from the form
+  const settings = {
+    aiProvider: selectedProvider,
+    apiKeys: {}
+  };
+
+  // Only save non-empty API keys
+  const geminiKey = geminiApiKey.value.trim();
+  const openaiKey = openaiApiKey.value.trim();
+  const anthropicKey = anthropicApiKey.value.trim();
+
+  if (geminiKey) settings.apiKeys.gemini = geminiKey;
+  if (openaiKey) settings.apiKeys.openai = openaiKey;
+  if (anthropicKey) settings.apiKeys.anthropic = anthropicKey;
+
+  // Validate that the selected provider has an API key
+  const hasRequiredKey =
+    (selectedProvider === 'gemini' && geminiKey) ||
+    (selectedProvider === 'openai' && openaiKey) ||
+    (selectedProvider === 'anthropic' && anthropicKey);
+
+  if (!hasRequiredKey) {
+    apiKeyWarning.classList.remove('hidden');
+    apiKeyWarning.textContent = `⚠️ Please enter an API key for ${getProviderName(selectedProvider)}.`;
+    return;
+  }
+
+  try {
+    // Save settings
+    const result = await window.electronAPI.saveSettings(settings);
+
+    if (result.success) {
+      // Close modal
+      closeSettingsModal();
+
+      // Show success message
+      resultsCount.textContent = `Settings saved! Using ${getProviderName(selectedProvider)}`;
+
+      // Clear current deals to force a new search
+      currentDeals = [];
+      showEmptyState();
+    } else {
+      apiKeyWarning.classList.remove('hidden');
+      apiKeyWarning.textContent = `⚠️ Error saving settings: ${result.error}`;
+    }
+  } catch (error) {
+    console.error('Error saving settings:', error);
+    apiKeyWarning.classList.remove('hidden');
+    apiKeyWarning.textContent = '⚠️ Error saving settings. Please try again.';
+  }
+}
+
+async function validateApiKey() {
+  const selectedProvider = aiProviderSelect.value;
+  const providerInputs = {
+    gemini: geminiApiKey,
+    openai: openaiApiKey,
+    anthropic: anthropicApiKey
+  };
+
+  const currentInput = providerInputs[selectedProvider];
+  const hasKey = currentInput.value.trim() !== '';
+
+  if (!hasKey) {
+    // Check if API key exists in store
+    const result = await window.electronAPI.checkApiKey(selectedProvider);
+    if (!result.hasKey) {
+      apiKeyWarning.classList.remove('hidden');
+      apiKeyWarning.textContent = `⚠️ No API key configured for ${getProviderName(selectedProvider)}. Please enter one below.`;
+    } else {
+      apiKeyWarning.classList.add('hidden');
+    }
+  } else {
+    apiKeyWarning.classList.add('hidden');
+  }
+}
+
+function getProviderName(provider) {
+  const names = {
+    gemini: 'Google Gemini',
+    openai: 'OpenAI',
+    anthropic: 'Anthropic Claude'
+  };
+  return names[provider] || provider;
+}
 
 // Search functionality
 async function handleSearch() {

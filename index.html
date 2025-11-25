@@ -23,6 +23,12 @@
         >
         <button id="searchButton" class="btn btn-primary">Search</button>
       </div>
+      <button id="settingsBtn" class="btn-settings" title="Settings">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M12 1v6m0 6v6m5.2-14.2l-4.2 4.2m-3 3l-4.2 4.2M23 12h-6m-6 0H1m14.2 5.2l-4.2-4.2m-3-3l-4.2-4.2"></path>
+        </svg>
+      </button>
     </header>
 
     <!-- Filters and Controls -->
@@ -121,6 +127,60 @@
         </div>
       </div>
     </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button id="closeSettings" class="btn-close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="settings-section">
+            <h3>AI Model Selection</h3>
+            <div class="form-group">
+              <label for="aiProviderSelect">Select AI Provider:</label>
+              <select id="aiProviderSelect" class="form-control">
+                <option value="gemini">Google Gemini</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic Claude</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3>API Keys</h3>
+            <p class="help-text">Enter your API keys below. They are stored securely on your device.</p>
+
+            <div class="form-group">
+              <label for="geminiApiKey">Google Gemini API Key:</label>
+              <input type="password" id="geminiApiKey" class="form-control" placeholder="Enter Gemini API key">
+              <small class="form-help">Get your key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
+            </div>
+
+            <div class="form-group">
+              <label for="openaiApiKey">OpenAI API Key:</label>
+              <input type="password" id="openaiApiKey" class="form-control" placeholder="Enter OpenAI API key">
+              <small class="form-help">Get your key from <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a></small>
+            </div>
+
+            <div class="form-group">
+              <label for="anthropicApiKey">Anthropic API Key:</label>
+              <input type="password" id="anthropicApiKey" class="form-control" placeholder="Enter Anthropic API key">
+              <small class="form-help">Get your key from <a href="https://console.anthropic.com/" target="_blank">Anthropic Console</a></small>
+            </div>
+          </div>
+
+          <div id="apiKeyWarning" class="alert alert-warning hidden">
+            ⚠️ Please enter an API key for the selected provider.
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="saveSettings" class="btn btn-primary">Save Settings</button>
+          <button id="cancelSettings" class="btn btn-secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script src="renderer.js"></script>
